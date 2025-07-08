@@ -3,20 +3,26 @@ pragma solidity 0.8.30;
 
 contract CharityFund{
     address public owner;
-    mapping(address => uint256) public donations;
+    mapping(address => uint256) public patrons;
+    bytes32 private hashedPassword;
 
-    constructor(){
+    constructor(string memory _password){
         owner = msg.sender;
-}
+        hashedPassword = keccak256(abi.encodePacked(_password));
+    }
+
     function donate() public payable{
-        require(msg.value > 0);
-        donations[msg.sender] += msg.value;
-}
-    function getBalance() public view returns (uint256){
+        patrons[msg.sender] += msg.value;
+    }
+
+    function balance() public view returns (uint256){
         return address(this).balance;
-}
-    function withdraw() public{
-        require(msg.sender == owner);
+    }
+
+    function withdraw(string memory _password) public{
+        require(owner == msg.sender);
+        require(hashedPassword == keccak256(abi.encodePacked(_password)));
         payable(owner).transfer(address(this).balance);
     }
+
 }
